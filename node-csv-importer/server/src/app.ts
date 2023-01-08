@@ -2,6 +2,7 @@ import express from 'express'
 import { router as indexRouter } from './routes/index.js';
 import { join, resolve } from 'path';
 
+
 const app = express();
 
 app.set('views', join(resolve(), 'src', 'views'))
