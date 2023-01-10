@@ -2,6 +2,7 @@ import { Employee, Prisma, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { parse } from "fast-csv";
 import { createReadStream } from "fs";
+import { Parser as CsvParser } from "json2csv";
 import invariant from "tiny-invariant";
 
 const prisma = new PrismaClient();
@@ -24,7 +25,7 @@ const upload = async (req: Request, res: Response) => {
       .on("end", async () => {
         try {
           await prisma.employee.createMany({
-            data: employees
+            data: employees,
           });
           res.status(201).send({
             message: `The file: ${req.file?.originalname} was successfully uploaded!`,
@@ -46,3 +47,66 @@ const upload = async (req: Request, res: Response) => {
     }
   }
 };
+
+const download = async (_req: Request, res: Response) => {
+  const objs = await prisma.employee.findMany();
+  let employees: Omit<
+    Employee,
+    "managerId" | "createAt" | "updateAt" | "avatar"
+  >[] = [];
+  objs.forEach((obj) => {
+    const {
+      id,
+      name,
+      email,
+      username,
+      dob,
+      company,
+      address,
+      location,
+      Salary,
+      about,
+      role,
+    } = obj;
+
+    employees.push({
+      id,
+      name,
+      email,
+      username,
+      dob,
+      company,
+      address,
+      location,
+      Salary,
+      about,
+      role,
+    });
+  });
+
+  const csvFields = [
+    "id",
+    "name",
+    "email",
+    "username",
+    "dob",
+    "company",
+    "address",
+    "location",
+    "salary",
+    "aobut",
+    "role",
+  ];
+
+  const csvParser = new CsvParser({ fields: csvFields });
+  const csvData = csvParser.parse(employees);
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-disposition", "attachment; filename=employees.csv");
+  res.status(200).end(csvData);
+};
+
+export default {
+  upload,
+  download,
+}

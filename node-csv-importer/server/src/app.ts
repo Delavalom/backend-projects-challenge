@@ -1,17 +1,21 @@
 import express from 'express'
-import { router as indexRouter } from './routes/index.js';
+import cors from 'cors'
+import { router as apiRouter } from './routes/api.js';
 import { join, resolve } from 'path';
 
 
 const app = express();
 
-app.set('views', join(resolve(), 'src', 'views'))
-app.set('view engine', 'ejs')
+const corsOptions = {
+    origin: 'http://localhost:3000',
+}
 
-app.use(express.static('public'))
+app.use(cors(corsOptions))
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 
-app.use('/', indexRouter);
+app.use('/api', apiRouter);
 
-app.listen(3000, () => console.log('listenning on port 3000'))
+const port = process.env.PORT || 8080
+
+app.listen(port, () => console.log(`listenning on port ${port}`))

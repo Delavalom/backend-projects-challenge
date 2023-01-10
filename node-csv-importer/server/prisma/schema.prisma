@@ -19,7 +19,7 @@ model Employee {
   company String
   address String
   location String
-  Salary Float
+  salary Float
   about String
   role String
   managedBy Manager @relation(fields: [managerId], references: [id])
