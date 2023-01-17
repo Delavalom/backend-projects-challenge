@@ -1,18 +1,12 @@
 import { PrismaClient, Product } from "@prisma/client";
 import { Router } from "express";
 import HttpException from "../exceptions/HttpException.js";
+import { type CreateProduct, type UpdateProduct, createProduct, updateProduct } from "../dtos/producto.dto.js";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
 
-const productSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().min(0).max(255),
-  stock: z.number(),
-  url: z.string().url(),
-  categoryId: z.number(),
-});
-type ProductSchema = z.infer<typeof productSchema>;
+
 
 export const route = Router();
 
@@ -33,6 +27,7 @@ route.get("/", async (_req, res, next) => {
 route.get("/:id", async (req, res, next) => {
   try {
     const { id }: { id: string } = req.params;
+    z.coerce.number().parse(id)
     const data = await prisma.product.findFirst({
       where: {
         id: Number(id),
@@ -49,7 +44,8 @@ route.get("/:id", async (req, res, next) => {
 
 route.post("/", async (req, res, next) => {
   try {
-    const data: ProductSchema = req.body;
+    const data: CreateProduct = req.body;
+    const validation = createProduct.parse(data)
     if (!data) {
       throw new HttpException(404, "not found mate");
     }
@@ -65,8 +61,9 @@ route.post("/", async (req, res, next) => {
 route.put("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const data: ProductSchema = req.body;
-    if (!id || !data) {
+    const data: UpdateProduct = req.body;
+    createProduct.parse(data)
+    if (!data) {
       throw new HttpException(404, "not found mate");
     }
     await prisma.product.update({
