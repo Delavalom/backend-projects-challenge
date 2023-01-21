@@ -1,12 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { PrismaService } from './prisma.service';
+import { ResponseTimeMiddleware } from './middleware/responseTime.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const prismaService = app.get(PrismaService)
-  await prismaService.enableShutdownHooks(app)
   app.setGlobalPrefix('api/v1')
+  app.use(ResponseTimeMiddleware)
   await app.listen(3000);
 }
 bootstrap();
