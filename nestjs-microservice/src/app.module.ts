@@ -7,6 +7,8 @@ import { redisStore } from "cache-manager-redis-store";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { ConfigModule } from '@nestjs/config';
 import config from './config/configuration'
+import { ScheduleModule } from "@nestjs/schedule";
+import { BillingService } from "./cronJobs/billing.service";
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import config from './config/configuration'
       isGlobal: true, 
       load: [config]
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     UploadFileModule,
     CacheModule.register({
@@ -32,6 +35,7 @@ import config from './config/configuration'
   ],
   controllers: [AppController],
   providers: [
+    BillingService,
     AppService,
     {
       provide: APP_INTERCEPTOR,
