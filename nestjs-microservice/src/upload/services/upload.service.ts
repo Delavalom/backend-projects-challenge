@@ -1,32 +1,45 @@
 import { CACHE_MANAGER, Inject, Injectable } from "@nestjs/common";
-import { createReadStream } from "fs";
-import { finished } from "stream/promises";
-import {Cache} from 'cache-manager'
-
+import { Cache } from "cache-manager";
+import { ConfigService } from "@nestjs/config";
+import * as csv from 'csvtojson'
+import { ZodError } from 'zod'
+import { UploadSchema, uploadSchema } from "../entities/upload.entity";
 
 
 @Injectable()
 export class UploadFileService {
-    constructor(@Inject(CACHE_MANAGER) private cacheService: Cache) {}
-    async uploadFile(file:Express.Multer.File) {
-        // const reading = createReadStream(file.path).on("data", (chunk) => {
+  constructor(
+    private readonly configService: ConfigService,
+    // @ts-ignore
+    @Inject(CACHE_MANAGER) private cacheService: Cache
+  ) {}
+  async uploadFile(file: Express.Multer.File) {
+    try {
+        const csvData = file.buffer.toString()
+        const data: UploadSchema = await csv().fromString(csvData)
 
-        // })
-        // await finished(reading)
-        // return "Stream is done reading"
-        await this.cacheService.set("csv", file)
+        uploadSchema.parse(data)
 
-        const cachedFile = await this.cacheService.get("csv")
-
+        const cachedFile = await this.cacheService.get<string>("csv");
+        
         if (cachedFile) {
-            console.log("data from cache")
+            console.log("data from cache");
             return {
-                file: cachedFile
-            }
+                file: cachedFile,
+            };
         }
 
+        await this.cacheService.set("csv", JSON.stringify(data));
+        
         return {
-            file: file.buffer.toString()
+          file: data
+        };
+    } catch (error) {
+        if (error instanceof ZodError) {
+            return error.message
         }
+        console.log(error)
     }
+  }
 }
+
