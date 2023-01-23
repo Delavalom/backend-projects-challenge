@@ -7,7 +7,7 @@ export class BillingService {
 
   constructor(private schedulerRegistry: SchedulerRegistry) {}
 
-  @Cron('*/1 * * * * *', {
+  @Cron(CronExpression.EVERY_10_MINUTES, {
     name: "test_cron"
   })
   handleCron() {

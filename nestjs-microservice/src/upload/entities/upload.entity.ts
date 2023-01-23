@@ -5,6 +5,7 @@ export const uploadSchema = z.array(
         city: z.string(),
         experience: z.string(),
         salary: z.string(),
+        position: z.string(),
         specialisation: z.string(),
         freq: z.string()
     })

@@ -1,6 +1,8 @@
 import {
   CacheInterceptor,
   Controller,
+  Get,
+  Header,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -13,10 +15,15 @@ import { UploadFileService } from "../services/upload.service";
 export class UploadFileController {
   constructor(private uploadFileService: UploadFileService) {}
   
-  @Post("/")
-  @UseInterceptors(FileInterceptor("file_asset"))
   // @UseInterceptors(CacheInterceptor) only for Get Request
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  @Post("accept")
+  create() {
+    return this.uploadFileService.createRecord()
+  }
+
+  @Post()
+  @UseInterceptors(FileInterceptor("file_asset"))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.uploadFileService.uploadFile(file)
   }
 }
