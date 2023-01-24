@@ -15,6 +15,7 @@ model Salary {
   position       String
   specialisation String
   freq           String
+  billing        DateTime @default(now()) @db.Date
   createAt       DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

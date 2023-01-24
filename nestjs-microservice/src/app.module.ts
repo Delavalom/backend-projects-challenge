@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import config from './config/configuration'
 import { ScheduleModule } from "@nestjs/schedule";
 import { BillingService } from "./cronJobs/billing.service";
+import { PrismaService } from "./prisma.service";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { BillingService } from "./cronJobs/billing.service";
   controllers: [AppController],
   providers: [
     BillingService,
+    PrismaService,
     AppService,
     {
       provide: APP_INTERCEPTOR,

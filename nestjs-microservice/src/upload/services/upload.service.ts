@@ -49,7 +49,7 @@ export class UploadFileService {
   async createRecord() {
     try {
       const cachedFile = await this.cacheService.get<string>("csv");
-
+      
       if (!cachedFile) {
         throw new Error("Cache data doesn't exist");
       }
@@ -60,6 +60,8 @@ export class UploadFileService {
 
       await this.prisma.salary.createMany({ data });
 
+      await this.cacheService.del("csv");
+      
       return {
         message: "Records created successfully",
       };
