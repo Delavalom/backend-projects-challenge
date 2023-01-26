@@ -36,7 +36,7 @@ import { PrismaService } from "./prisma.service";
   ],
   controllers: [AppController],
   providers: [
-    BillingService,
+    // BillingService,
     PrismaService,
     AppService,
     {
