@@ -10,7 +10,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  registerUser(@Body() user: UserSchema) {
+  registerUser(@Body() user: UserSchema & { confirmationPassword: string }) {
     return this.authService.registerUser(user);
   }
 

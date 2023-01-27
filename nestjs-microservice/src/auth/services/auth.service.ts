@@ -17,7 +17,7 @@ export class AuthService {
     return retUser;
   }
 
-  async registerUser(user: any): Promise<Omit<UserSchema, 'password'>> {
+  async registerUser(user: UserSchema & { confirmationPassword: string }): Promise<Omit<UserSchema, 'password'>> {
     const existingUser = this.users.find(u => u.email === user.email);
     if (existingUser) {
       throw new BadRequestException('User remail must be unique');
