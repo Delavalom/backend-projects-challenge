@@ -1,8 +1,4 @@
-import {
-  CacheInterceptor,
-  CacheModule,
-  Module,
-} from "@nestjs/common";
+import { CacheInterceptor, CacheModule, Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
@@ -13,7 +9,9 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { BillingService } from "./cronJobs/billing.service";
 import { PrismaService } from "./prisma.service";
 import config from "./config/configuration";
-import { RedisStore } from "./redis.store";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerStorageRedisService } from "nestjs-throttler-storage-redis";
+import { redisStore } from "cache-manager-redis-store";
 
 @Module({
   imports: [
@@ -22,11 +20,23 @@ import { RedisStore } from "./redis.store";
       load: [config],
     }),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 5,
+      storage: new ThrottlerStorageRedisService(),
+    }),
     UsersModule,
     UploadFileModule,
     CacheModule.register({
       // @ts-ignore
-      store: RedisStore,
+      store: async () =>
+      await redisStore({
+        password: process.env.REDIS_STORE_PASSWORD,
+        socket: {
+          host: "redis-13809.c98.us-east-1-4.ec2.cloud.redislabs.com",
+          port: 13809,
+        },
+      }),
       ttl: 0,
       isGlobal: true,
     }),
@@ -34,7 +44,7 @@ import { RedisStore } from "./redis.store";
   controllers: [AppController],
   providers: [
     // BillingService,
-    // PrismaService,
+    PrismaService,
     AppService,
     {
       provide: APP_INTERCEPTOR,
