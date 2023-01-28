@@ -8,6 +8,7 @@ import {
 } from "@nestjs/websockets";
 import { Socket, Server } from "socket.io";
 
+
 export class EventsGateway {
   @WebSocketServer()
   server: Server;
@@ -17,6 +18,7 @@ export class EventsGateway {
     @MessageBody() data: string,
     @ConnectedSocket() client: Socket
   ): string {
+    this.server.path("/events")
     return data;
   }
   @SubscribeMessage('identity')
