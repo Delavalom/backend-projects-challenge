@@ -1,8 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { MessageSchema, messageSchema} from './events.model'
 
 @Injectable()
-export class EventsService { 
+export class EventsService {
+  private readonly logger = new Logger(EventsService.name)
+
     messages: MessageSchema[] = []
     clientToUser = {}
 
@@ -14,10 +16,10 @@ export class EventsService {
     getAll() {
         return this.messages
     }
-    join() {}
 
     identify(name: string, clientId: string) {
         this.clientToUser[clientId] = name
+        return this.clientToUser
     }
 
     getClientName(clientId: string) {

@@ -1,22 +1,43 @@
-import { useState, useEffect } from "react";
-// import { Manager } from "socket.io-client"
+import {
+  useState,
+  useEffect,
+  useRef,
+} from "react";
+import { io } from "socket.io-client";
 
-// const manager = new Manager("http://localhost:3000/", {
-//   autoConnect: true,
-//   reconnectionDelayMax: 2000
-// })
+const socket = io("http://192.168.68.61:3000//", {
+  autoConnect: true,
+  reconnectionDelayMax: 2000,
+});
 
-// const socket = manager.socket("/")
+type Message = { name: string; textMessage: string };
 
 function App() {
-  const [input, setInput] = useState("");
-  const messages: { name: string; textMessage: string }[] = [];
+  const textMessage = useRef<HTMLInputElement | null>(null);
+  const name = useRef<HTMLInputElement | null>(null);
+  const [joined, setJoined] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
 
-  const createMessage = (input: string) => {
+  const createMessage = () => {
+    socket.emit(
+      "createMessage",
+      { name: "Luis", textMessage: textMessage.current?.value },
+      (response: Message) => {
+        console.log(response);
+      }
+    );
   };
-  
+
+  const joinRoom = () => {
+    socket.emit("joinRoom", { name: name.current?.value }, () => {
+      setJoined(true);
+    });
+  };
+
   useEffect(() => {
-    // socket.on("message", () => {})
+    socket.emit("findAll", {}, (response: Message[]) => {
+      setMessages(response);
+    });
   }, [messages]);
 
   return (
@@ -27,25 +48,41 @@ function App() {
       >
         {messages.map((message, idx) => (
           <span
-            id={`${idx}`}
+            key={`${idx}`}
           >{`[${message.name}] ${message.textMessage}`}</span>
         ))}
       </div>
-      <div className="w-full flex gap-2">
-        <input
-          type="text"
-          onChange={(e) => setInput(e.target.value)}
-          value={input}
-          placeholder="Escribe algo"
-          className="flex-1 py-2 px-2 rounded-sm bg-zinc-900 border-zinc-700"
-        />
-        <button
-          onClick={() => createMessage(input)}
-          className="hover:bg-indigo-900 border border-indigo-800"
-        >
-          Send
-        </button>
-      </div>
+      {!joined ? (
+        <div className="w-full flex gap-2">
+          <input
+            ref={name}
+            type="text"
+            placeholder="Cual es tu nombre?"
+            className="flex-1 py-2 px-2 rounded-sm bg-zinc-900 border-zinc-700"
+          />
+          <button
+            onClick={joinRoom}
+            className="hover:bg-indigo-900 border border-indigo-800"
+          >
+            Confirm
+          </button>
+        </div>
+      ) : (
+        <div className="w-full flex gap-2">
+          <input
+            ref={textMessage}
+            type="text"
+            placeholder="Escribe algo"
+            className="flex-1 py-2 px-2 rounded-sm bg-zinc-900 border-zinc-700"
+          />
+          <button
+            onClick={createMessage}
+            className="hover:bg-indigo-900 border border-indigo-800"
+          >
+            Send
+          </button>
+        </div>
+      )}
     </div>
   );
 }

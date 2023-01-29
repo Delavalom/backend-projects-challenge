@@ -8,11 +8,17 @@ import {
 import { Socket, Server } from "socket.io";
 import { EventsService } from "./events.service";
 import { MessageSchema, messageSchema } from "./events.model";
+import { Logger } from "@nestjs/common";
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: "*",
+  },
+})
 export class EventsGateway {
   @WebSocketServer()
   server: Server;
+  private readonly logger = new Logger(EventsGateway.name);
 
   constructor(private eventsService: EventsService) {}
 
@@ -20,6 +26,7 @@ export class EventsGateway {
   async create(@MessageBody() payload: MessageSchema) {
     try {
       const message = await this.eventsService.create(payload);
+      this.logger.log(message);
       this.server.emit("message", message);
 
       return message;
